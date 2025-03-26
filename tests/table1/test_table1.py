@@ -1,2 +1,2 @@
-def test_one():
-    return
+def test_one(read_data):
+    assert True
