@@ -1,8 +1,10 @@
 source:
-  type: "database"
-  transformation: ["Y","python"]
-  table: "customer_silver_expected"
-  cred_lookup: "sqlserver"
+  path: "/Users/admin/PycharmProjects/taf/input_files/Contact_info_s.csv"
+  type: "csv"
+  schema: "Y"
+  options:
+    header: True
+    delimiter: ","
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 target:

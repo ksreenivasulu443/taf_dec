@@ -22,6 +22,10 @@ def spark_session(request):
     yield spark
     spark.stop()
 
+@pytest.fixture(scope='module')
+def read_data(spark_session,read_config, request):
+
+
 
 
 
