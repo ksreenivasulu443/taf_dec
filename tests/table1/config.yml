@@ -9,7 +9,7 @@ source:
 
 target:
   type: "database"
-  transformation : ["N","N"]
+  transformation : ["Y","sql"]
   table: "customer_silver"
   cred_lookup: "sqlserver"
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
