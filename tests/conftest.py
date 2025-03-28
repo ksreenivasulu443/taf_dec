@@ -34,7 +34,15 @@ def read_query(dirpath):
         sql_query = file.read()
     return sql_query
 
+def read_cred(dirpath):
+    cred_file_path =  os.path.dirname(dirpath) + '/project_cred.yml'
+    with open(cred_file_path,'r') as f:
+        creds = yaml.safe_load(f)
+    return creds
+
+
 def read_db(spark,config_data,dirpath):
+    creds = read_cred(dirpath)
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
         sql_query = read_query(dirpath)
         print("sql_query", sql_query)
@@ -60,8 +68,8 @@ def read_file():
 
 @pytest.fixture(scope='module')
 def read_data(spark_session,read_config, request):
-    config_data = read_config
     spark = spark_session
+    config_data = read_config
     dirpath = request.node.fspath.dirname
 
     source_config = config_data['source']
@@ -74,7 +82,7 @@ def read_data(spark_session,read_config, request):
         source = read_file()
 
     if target_config['type'] == 'database':
-        target = read_db(spark, target_config)
+        target = read_db(spark, target_config,dirpath)
     else:
         target = read_file()
 
