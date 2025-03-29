@@ -8,12 +8,10 @@ source:
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 target:
-  path: "/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv"
-  type: "csv"
-  schema: "N"
-  options:
-    header: True
-    delimiter: ","
+  type: "database"
+  transformation : ["y","sql"]
+  table: "employees"
+  cred_lookup: "postgres"
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 validations:

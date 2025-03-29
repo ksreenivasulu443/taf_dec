@@ -1,102 +1,87 @@
-from pyspark.shell import spark
+# from unicodedata import lookup
 from pyspark.sql import SparkSession
 import pytest
-import os
 import yaml
+import os
 import json
-from pyspark.sql.types import StructType, StructField
-from pyspark.sql.functions import col, explode_outer
 from pyspark.sql.types import StructType, ArrayType
+from src.utility.general_utility import flatten
+import subprocess
 
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    postgres_jar = taf_path +'/jars/postgresql-42.2.5.jar'
-    jar_path =  postgres_jar
-    print('#'*100)
-    print("jarpath", jar_path)
-    print('#' * 100)
-    spark = (SparkSession.builder.master("local[2]")
-        .config("spark.jars", "/Users/admin/PycharmProjects/taf_dec/jars/postgresql-42.2.5.jar")
-        .config("spark.driver.extraClassPath", "/Users/admin/PycharmProjects/taf_dec/jars/postgresql-42.2.5.jar")
-        .config("spark.executor.extraClassPath", "/Users/admin/PycharmProjects/taf_dec/jars/postgresql-42.2.5.jar")
-        .appName("pytest_framework")
-        .getOrCreate())
+    #dir_path = request.node.fspath.dirname
+    snow_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/snowflake-jdbc-3.14.3.jar'
+    postgres_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/postgresql-42.2.5.jar'
+    azure_storage = '/Users/admin/PycharmProjects/test_automation_project/jar/azure-storage-8.6.6.jar'
+    hadoop_azure = '/Users/admin/PycharmProjects/test_automation_project/jar/hadoop-azure-3.3.1.jar'
+    sql_server = '/Users/admin/PycharmProjects/taf/jars/mssql-jdbc-12.2.0.jre8.jar'
+    jar_path = snow_jar + ',' + postgres_jar + ',' + azure_storage + ',' + hadoop_azure + ',' + sql_server
+    spark = SparkSession.builder.master("local[*]") \
+        .appName("pytest_framework") \
+        .config("spark.jars", jar_path) \
+        .config("spark.driver.extraClassPath", jar_path) \
+        .config("spark.executor.extraClassPath", jar_path) \
+        .getOrCreate()
     return spark
-
-
 
 @pytest.fixture(scope='module')
 def read_config(request):
-    config_path = request.node.fspath.dirname+'/config.yml'
-    with open(config_path,'r') as f:
+    print("request.node.fspath.dirname", request.node.fspath.dirname)
+    dir_path = request.node.fspath.dirname
+    config_path = dir_path + '/config.yml'
+    with open(config_path, 'r') as f:
         config_data = yaml.safe_load(f)
     return config_data
 
-def read_query(dirpath):
-    sql_query_path = dirpath + '/transformation.sql'
+
+def read_schema(dir_path):
+    schema_path = dir_path + '/schema.json'
+    with open(schema_path, 'r') as schema_file:
+        schema = StructType.fromJson(json.load(schema_file))
+    return schema
+
+def read_query(dir_path):
+    sql_query_path = dir_path + '/transformation.sql'
     with open(sql_query_path, "r") as file:
         sql_query = file.read()
     return sql_query
 
-def read_cred(dirpath, env ='qa'):
-    cred_file_path =  os.path.dirname(dirpath) + '/project_cred.yml'
-    with open(cred_file_path,'r') as f:
-        creds = yaml.safe_load(f)[env]
-    return creds
 
-def read_schema(dirpath):
-    schema_file_path  =  dirpath + '/schema.json'
-    with open(schema_file_path,'r') as f:
-        schema  = StructType.fromJson(json.load(f))
-    return schema
-
-
-def flatten(df):
-    # compute Complex Fields (Lists and Structs) in Schema
-    complex_fields = dict([(field.name, field.dataType)
-                           for field in df.schema.fields
-                           if type(field.dataType) == ArrayType or type(field.dataType) == StructType])
-    print("complex fields", complex_fields)
-    print("length of complex fileds",len(complex_fields))
-    while len(complex_fields) != 0:
-        col_name = list(complex_fields.keys())[0]
-        print("Processing :" + col_name + " Type : " + str(type(complex_fields[col_name])))
-        # if StructType then convert all sub element to columns.
-        # i.e. flatten structs
-        if type(complex_fields[col_name]) == StructType:
-            expanded = [col(col_name + '.' + k).alias( k) for k in
-                        [n.name for n in complex_fields[col_name]]]
-            print("expanded columns", expanded)
-            df = df.select("*", *expanded).drop(col_name)
-
-        # if ArrayType then add the Array Elements as Rows using the explode function
-        # i.e. explode Arrays
-        elif type(complex_fields[col_name]) == ArrayType:
-            df = df.withColumn(col_name, explode_outer(col_name))
-            print("after explode o/p of df")
-            #df.show()
+def read_file(config_data,spark, dir_path=None):
+    if config_data['type'] == 'csv':
+        if config_data['schema'] == 'Y':
+            schema = read_schema(dir_path)
+            df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header'])
+        else:
+            df = spark.read.csv(config_data['path'], header= config_data['options']['header'],inferSchema=True)
+    elif config_data['type'] == 'json':
+        df = spark.read.json(config_data['path'], multiLine=config_data['options']['multiline'] )
+        df = flatten(df)
+    elif config_data['type'] == 'parquet':
+        df = spark.read.parquet(config_data['path'])
+    elif config_data['type'] == 'avro':
+        df = spark.read.format('avro').load(config_data['path'])
+    elif config_data['type'] == 'txt':
+        pass
+    elif config_data['type'] == 'adls':
+        pass
     return df
 
-
-def read_db(spark,config_data,dirpath):
-    creds = read_cred(dirpath)[config_data['cred_lookup']]
-    print("#"*100, end= '\n')
-    print("creds ", creds)
-    print("#"*100, end= '\n')
+def read_db(config_data,spark,dir_path):
+    creds = load_credentials()
+    cred_lookup = config_data['cred_lookup']
+    creds = creds[cred_lookup]
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
-
-        sql_query = read_query(dirpath)
-        print("#" * 100, end='\n')
-        print("sql query", sql_query)
-        print("#" * 100, end='\n')
-        df = (spark.read.format("jdbc").
-            option("url", "jdbc:postgresql://localhost:5432/postgres").
-            option("user", 'postgres').
-            option("password", 'Dharmavaram1@').
-            option("query", sql_query).
-            option("driver", 'org.postgresql.Driver').load())
+        sql_query= read_query(dir_path)
+        print("sql_query", sql_query)
+        df = spark.read.format("jdbc"). \
+            option("url", creds['url']). \
+            option("user", creds['user']). \
+            option("password", creds['password']). \
+            option("query", sql_query). \
+            option("driver", creds['driver']).load()
 
     else:
         df = spark.read.format("jdbc"). \
@@ -107,77 +92,71 @@ def read_db(spark,config_data,dirpath):
             option("driver", creds['driver']).load()
     return df
 
-def read_file(spark, config_data, dirpath):
-    type = config_data['type'].lower()
-    if  type == 'csv':
-        if config_data['schema'].lower() == 'y':
-            schema = read_schema(dirpath)
-            df = spark.read.csv(config_data['path'],
-                                sep=config_data['options']['delimiter'],
-                                header=config_data['options']['header'],
-                                schema=schema)
-
-        else:
-            df = spark.read.csv(path=config_data['path'],
-                                sep=config_data['options']['delimiter'] ,
-                                header=config_data['options']['header'] ,
-                                inferSchema=True)
-
-    elif type == 'json':
-        df = spark.read.json(config_data['path'], multiLine=True )
-        df = flatten(df)
-    elif type == 'parquet':
-        df = spark.read.parquet(config_data['path'])
-    elif type == 'avro':
-        df = spark.read.format('avro').load(config_data['path'])
-    elif type == 'txt':
-        pass
-    return df
-
-
 @pytest.fixture(scope='module')
-def read_data(spark_session,read_config, request):
+def read_data(read_config,spark_session,request ):
     spark = spark_session
     config_data = read_config
-    dirpath = request.node.fspath.dirname
-
     source_config = config_data['source']
     target_config = config_data['target']
-    validation_config = config_data['validations']
-
+    dir_path = request.node.fspath.dirname
     if source_config['type'] == 'database':
-        source = read_db(spark=spark, config_data=source_config,dirpath=dirpath)
+        if source_config['transformation'][1].lower() == 'python' and source_config['transformation'][0].lower() == 'y':
+            python_file_path = dir_path + '/transformation.py'
+            print("python file name", python_file_path)
+            subprocess.run(["python", python_file_path])
+
+        source = read_db(config_data=source_config,spark=spark,dir_path=dir_path)
     else:
-        source = read_file(spark=spark, config_data=source_config, dirpath=dirpath)
+        source = read_file(config_data = source_config,spark=spark, dir_path=dir_path)
 
     if target_config['type'] == 'database':
-        target = read_db(spark=spark, config_data=target_config,dirpath=dirpath)
+        if target_config['transformation'][1].lower() == 'python' and target_config['transformation'][0].lower() == 'y':
+            python_file_path = dir_path + '/transformation.py'
+            subprocess.run(python_file_path)
+        target = read_db(config_data=target_config,spark=spark,dir_path=dir_path)
     else:
-        target = read_file(spark=spark, config_data= target_config, dirpath=dirpath)
+        target = read_file(config_data =target_config,spark=spark,dir_path=dir_path)
+
+    print("target_exclude", target_config['exclude_cols'])
 
     return source.drop(*source_config['exclude_cols']), target.drop(*target_config['exclude_cols'])
 
 
 
+def load_credentials(env="qa"):
+    """Load credentials from the centralized YAML file."""
+    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    credentials_path = taf_path+'/project_config/cred_config.yml'
 
+    with open(credentials_path, "r") as file:
+        credentials = yaml.safe_load(file)
+        print(credentials[env])
+    return credentials[env]
 
-
-
-
-
-
-
-
-
-@pytest.fixture(scope='session')
-def spark_session_cloud():
-    spark = SparkSession.builder.appName('test auto').getOrCreate()
-    yield spark
-    spark.stop()
-
-
-
-
+# # conftest.py
+# # from pytest_html import extras
+#
+# def pytest_html_results_table_header(cells):
+#     """Add a custom header for Failure Details in the HTML report."""
+#     cells.insert(1, "Failure Details")
+#
+# def pytest_html_results_table_row(report, cells):
+#     """Insert failure details for each test into the HTML report."""
+#     if hasattr(report, "details"):
+#         cells.insert(1, report.details)
+#     else:
+#         cells.insert(1, "N/A")
+#
+# def pytest_runtest_logreport(report):
+#     """Attach failure details dynamically."""
+#     if report.when == "call" and report.failed:
+#         if hasattr(report, "details"):
+#             report.details = (
+#                 f"Source count: {report.source_count}, "
+#                 f"Target count: {report.target_count}, "
+#                 f"Records only in Source: {report.fail_count_source}, "
+#                 f"Records only in Target: {report.fail_count_target}."
+#             )
 
 
 
