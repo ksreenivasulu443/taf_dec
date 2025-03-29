@@ -1,10 +1,6 @@
 source:
-  path: "/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv"
-  type: "csv"
-  schema: "Y"
-  options:
-    header: True
-    delimiter: ","
+  path: "/Users/admin/PycharmProjects/taf_dec/input_files/userdata1.parquet"
+  type: "parquet"
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 target:

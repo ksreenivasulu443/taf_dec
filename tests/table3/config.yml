@@ -1,19 +1,16 @@
 source:
-  path: "/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv"
-  type: "csv"
-  schema: "Y"
+  path: "/Users/admin/PycharmProjects/taf_dec/input_files/singleline.json"
+  type: "json"
   options:
-    header: True
-    delimiter: ","
+    multiline: False
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 target:
-  path: "/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv"
-  type: "csv"
+  path: "/Users/admin/PycharmProjects/taf_dec/input_files/singleline.json"
+  type: "json"
   schema: "N"
   options:
-    header: True
-    delimiter: ","
+    multiline: True
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 validations:

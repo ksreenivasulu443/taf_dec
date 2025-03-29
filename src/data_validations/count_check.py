@@ -2,16 +2,10 @@ def count_val(source, target):
     source_cnt = source.count()
     target_cnt = target.count()
 
-
     if source_cnt == target_cnt:
         print("count is matching")
-        status = 'PASS'
+        satus = 'PASS'
     else:
         print("count is not matching")
         status = 'FAIL'
     return status
-
-def test_count_check(read_data):
-    source, target = read_data
-    status = count_val(source, target)
-    assert status == 'PASS'
