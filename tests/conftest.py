@@ -100,19 +100,10 @@ def read_data(read_config,spark_session,request ):
     target_config = config_data['target']
     dir_path = request.node.fspath.dirname
     if source_config['type'] == 'database':
-        if source_config['transformation'][1].lower() == 'python' and source_config['transformation'][0].lower() == 'y':
-            python_file_path = dir_path + '/transformation.py'
-            print("python file name", python_file_path)
-            subprocess.run(["python", python_file_path])
-
         source = read_db(config_data=source_config,spark=spark,dir_path=dir_path)
     else:
         source = read_file(config_data = source_config,spark=spark, dir_path=dir_path)
-
     if target_config['type'] == 'database':
-        if target_config['transformation'][1].lower() == 'python' and target_config['transformation'][0].lower() == 'y':
-            python_file_path = dir_path + '/transformation.py'
-            subprocess.run(python_file_path)
         target = read_db(config_data=target_config,spark=spark,dir_path=dir_path)
     else:
         target = read_file(config_data =target_config,spark=spark,dir_path=dir_path)

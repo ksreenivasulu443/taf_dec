@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-
+from src.utility.general_utility import flatten
 # Initialize Spark session
 spark = (SparkSession.builder.master("local[2]")
         .config("spark.jars", "/Users/admin/PycharmProjects/taf_dec/jars/postgresql-42.2.5.jar")
@@ -7,24 +7,9 @@ spark = (SparkSession.builder.master("local[2]")
         .getOrCreate())
 print(spark.sparkContext.getConf().get("spark.jars"))
 
-jdbc_url = "jdbc:postgresql://localhost:5432/postgres"  # Replace with actual values
-
-db_properties = {
-    "user": "postgres",    # Replace with your DB username
-    "password": "Dharmavaram1@",  # Replace with your DB password
-    "driver": "org.postgresql.Driver"
-}
-
-
-df = (spark.read
-    .format("jdbc")
-    .option("url", jdbc_url)
-    .option("dbtable", "employees")
-    .option("user", db_properties["user"])
-    .option("password", db_properties["password"])
-    .option("driver", db_properties["driver"])
-    .load())
+df = spark.read.json("/Users/admin/PycharmProjects/taf_dec/input_files/Complex2.json", multiLine=True)
 
 df.show()
 
+df2 = flatten(df)
 
