@@ -49,7 +49,8 @@ def read_query(dir_path):
     return sql_query
 
 
-def read_file(config_data,spark, dir_path=None):
+def read_file(config_data,spark, dir_path):
+    df = None
     if config_data['type'] == 'csv':
         if config_data['schema'] == 'Y':
             schema = read_schema(dir_path)
@@ -65,14 +66,13 @@ def read_file(config_data,spark, dir_path=None):
         df = spark.read.format('avro').load(config_data['path'])
     elif config_data['type'] == 'txt':
         pass
-    elif config_data['type'] == 'adls':
-        pass
     return df
 
 def read_db(config_data,spark,dir_path):
     creds = load_credentials()
     cred_lookup = config_data['cred_lookup']
     creds = creds[cred_lookup]
+    df = None
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
         sql_query= read_query(dir_path)
         print("sql_query", sql_query)
@@ -132,31 +132,6 @@ def load_credentials(env="qa"):
         credentials = yaml.safe_load(file)
         print(credentials[env])
     return credentials[env]
-
-# # conftest.py
-# # from pytest_html import extras
-#
-# def pytest_html_results_table_header(cells):
-#     """Add a custom header for Failure Details in the HTML report."""
-#     cells.insert(1, "Failure Details")
-#
-# def pytest_html_results_table_row(report, cells):
-#     """Insert failure details for each test into the HTML report."""
-#     if hasattr(report, "details"):
-#         cells.insert(1, report.details)
-#     else:
-#         cells.insert(1, "N/A")
-#
-# def pytest_runtest_logreport(report):
-#     """Attach failure details dynamically."""
-#     if report.when == "call" and report.failed:
-#         if hasattr(report, "details"):
-#             report.details = (
-#                 f"Source count: {report.source_count}, "
-#                 f"Target count: {report.target_count}, "
-#                 f"Records only in Source: {report.fail_count_source}, "
-#                 f"Records only in Target: {report.fail_count_target}."
-#             )
 
 
 
