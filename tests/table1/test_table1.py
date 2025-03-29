@@ -1,3 +1,4 @@
+import pytest
 def count_val(source, target):
     source_cnt = source.count()
     target_cnt = target.count()
@@ -5,13 +6,11 @@ def count_val(source, target):
 
     if source_cnt == target_cnt:
         print("count is matching")
-        status = 'PASS'
+        return True
     else:
         print("count is not matching")
-        status = 'FAIL'
-    return status
-
+        return False
+@pytest.mark.sanity
 def test_count_check(read_data):
     source, target = read_data
-    status = count_val(source, target)
-    assert status == 'PASS'
+    assert count_val(source, target)
