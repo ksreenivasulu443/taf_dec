@@ -7,14 +7,17 @@ import yaml
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    # taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # snow_jar = taf_path +'/jars/snowflake-jdbc-3.14.3.jar'
-    # postgres_jar = taf_path +'/jars/postgresql-42.2.5.jar'
+    postgres_jar = taf_path +'/jars/postgresql-42.2.5.jar'
     # azure_storage = taf_path +'/jars/azure-storage-8.6.6.jar'
     # hadoop_azure = taf_path +'/jars/hadoop-azure-3.3.1.jar'
     # sql_server = taf_path +'/jars/mssql-jdbc-12.2.0.jre8.jar'
-    # jar_path = snow_jar + ',' + postgres_jar + ',' + azure_storage + ',' + hadoop_azure + ',' + sql_server
+    jar_path =  postgres_jar
     spark = SparkSession.builder.master("local[2]") \
+        .config("spark.jars", jar_path) \
+        .config("spark.driver.extraClassPath", jar_path) \
+        .config("spark.executor.extraClassPath", jar_path) \
         .appName("pytest_framework") \
         .getOrCreate()
     return spark
@@ -34,18 +37,24 @@ def read_query(dirpath):
         sql_query = file.read()
     return sql_query
 
-def read_cred(dirpath):
+def read_cred(dirpath, env ='qa'):
     cred_file_path =  os.path.dirname(dirpath) + '/project_cred.yml'
     with open(cred_file_path,'r') as f:
-        creds = yaml.safe_load(f)
+        creds = yaml.safe_load(f)[env]
     return creds
 
 
 def read_db(spark,config_data,dirpath):
-    creds = read_cred(dirpath)
+    creds = read_cred(dirpath)[config_data['cred_lookup']]
+    print("#"*100, end= '\n')
+    print("creds ", creds)
+    print("#"*100, end= '\n')
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
+
         sql_query = read_query(dirpath)
-        print("sql_query", sql_query)
+        print("#" * 100, end='\n')
+        print("sql query", sql_query)
+        print("#" * 100, end='\n')
         df = spark.read.format("jdbc"). \
             option("url", creds['url']). \
             option("user", creds['user']). \
@@ -76,13 +85,13 @@ def read_data(spark_session,read_config, request):
     target_config = config_data['target']
     validation_config = config_data['validations']
 
-    if source_config['type'] == 'databse':
-        source = read_db(spark, source_config,dirpath)
+    if source_config['type'] == 'database':
+        source = read_db(spark=spark, config_data=source_config,dirpath=dirpath)
     else:
         source = read_file()
 
     if target_config['type'] == 'database':
-        target = read_db(spark, target_config,dirpath)
+        target = read_db(spark=spark, config_data=target_config,dirpath=dirpath)
     else:
         target = read_file()
 

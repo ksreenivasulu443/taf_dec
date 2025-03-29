@@ -11,7 +11,7 @@ target:
   type: "database"
   transformation : ["y","sql"]
   table: "customer_silver"
-  cred_lookup: "sqlserver"
+  cred_lookup: "postgres"
   exclude_cols: []
 
 validations:
