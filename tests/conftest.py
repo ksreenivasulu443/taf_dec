@@ -47,7 +47,6 @@ def read_query(dir_path):
         sql_query = file.read()
     return sql_query
 
-
 def read_file(config_data,spark, dir_path):
     df = None
     if config_data['type'] == 'csv':
@@ -122,9 +121,3 @@ def load_credentials(env="qa"):
         credentials = yaml.safe_load(file)
         print(credentials[env])
     return credentials[env]
-
-
-
-
-
-
