@@ -1,17 +1,17 @@
-# from unicodedata import lookup
 from pyspark.sql import SparkSession
 import pytest
 import yaml
 import os
 import json
-from pyspark.sql.types import StructType, ArrayType
+from pyspark.sql.types import StructType
 from src.utility.general_utility import flatten
-import subprocess
+
 
 
 @pytest.fixture(scope='session')
 def spark_session(request):
     #dir_path = request.node.fspath.dirname
+    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     snow_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/snowflake-jdbc-3.14.3.jar'
     postgres_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/postgresql-42.2.5.jar'
     azure_storage = '/Users/admin/PycharmProjects/test_automation_project/jar/azure-storage-8.6.6.jar'
@@ -28,9 +28,8 @@ def spark_session(request):
 
 @pytest.fixture(scope='module')
 def read_config(request):
-    print("request.node.fspath.dirname", request.node.fspath.dirname)
-    dir_path = request.node.fspath.dirname
-    config_path = dir_path + '/config.yml'
+    config_path = request.node.fspath.dirname + '/config.yml'
+    print("config path", config_path)
     with open(config_path, 'r') as f:
         config_data = yaml.safe_load(f)
     return config_data
