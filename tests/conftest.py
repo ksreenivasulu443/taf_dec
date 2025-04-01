@@ -11,7 +11,7 @@ from src.utility.general_utility import flatten
 @pytest.fixture(scope='session')
 def spark_session(request):
     #dir_path = request.node.fspath.dirname
-    taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     snow_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/snowflake-jdbc-3.14.3.jar'
     postgres_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/postgresql-42.2.5.jar'
     azure_storage = '/Users/admin/PycharmProjects/test_automation_project/jar/azure-storage-8.6.6.jar'
