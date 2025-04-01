@@ -19,3 +19,5 @@ def records_only_in_source(source_df, target_df, key_columns):
         status = "PASS"
         write_output("Records Only in Source", status, "No extra records found in source.")
 
+    return status
+

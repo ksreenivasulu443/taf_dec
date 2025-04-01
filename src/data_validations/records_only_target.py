@@ -21,4 +21,5 @@ def records_only_in_target(source_df, target_df, key_columns):
             validation_type="Records Only in Target",
             status=status,
             details="No extra records found in target.")
+    return status
 

@@ -1,10 +1,8 @@
 source:
-  path: "/Users/admin/PycharmProjects/taf_dec/input_files/Complex.json"
-  type: "json"
-  schema: "n"
-  options:
-    multiline: True
-    delimiter: ","
+  type: "database"
+  transformation : ["y","sql"]
+  table: "employees"
+  cred_lookup: "postgres"
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
 target:
@@ -16,7 +14,7 @@ target:
 
 validations:
   count_check:
-    key_columns: ["customer_id"]
+    key_columns: ["id"]
   duplicate_check:
     key_columns: ["customer_id"]
   null_check:
