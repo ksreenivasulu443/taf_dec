@@ -10,6 +10,8 @@ timestamp = datetime.datetime.now().strftime("%d%m%Y%H%M%S")
 report_filename = os.path.join(report_dir, f"report_{timestamp}.txt")
 print(report_filename)
 
+
+
 def write_output(validation_type, status, details):
     # Write the output to the report file
     with open(report_filename, "a") as report:
