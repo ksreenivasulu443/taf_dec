@@ -9,10 +9,11 @@ def count_val(source, target, key_columns):
         status = 'PASS'
         write_output(validation_type="count check",
                      status=status,
-                     details="Count is matching between source and target")
-
+                     details=f"Count is matching between source and target. source count{source_cnt} and target count is {target_cnt}")
+        records_only_in_target(source_df=source, target_df=target, key_columns=key_columns)
+        records_only_in_source(source_df=source, target_df=target, key_columns=key_columns)
     else:
-        print("count is not matching", abs(source_cnt-target_cnt))
+        print(f"count is not matching. source count{source_cnt} and target count is {target_cnt} and diff is {abs(source_cnt-target_cnt)}")
         status = 'FAIL'
         records_only_in_target(source_df =source, target_df=target, key_columns=key_columns)
         records_only_in_source(source_df = source, target_df=target, key_columns=key_columns)

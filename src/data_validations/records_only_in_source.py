@@ -1,13 +1,18 @@
 from src.utility.report_lib import write_output
+from pyspark.sql import  SparkSession
+
+spark = SparkSession.builder.master('local[1]').appName('test').getOrCreate()
 
 def records_only_in_source(source_df, target_df, key_columns):
     """Validate records present only in the source."""
     only_in_source = source_df.select(key_columns).exceptAll(target_df.select(key_columns))
-
+    only_in_source.show()
     count_only_in_source = only_in_source.count()
     if count_only_in_source > 0:
-        failed_records = only_in_source.limit(5).collect()  # Get the first 5 failing rows
-        failed_preview = [row.asDict() for row in failed_records]  # Convert rows to a dictionary for display
+        failed_records = only_in_source.limit(5).collect() # Get the first 5 failing rows
+        print("failed records",failed_records)
+        failed_preview = [row.asDict() for row in failed_records]
+        print("failed_preview", failed_preview)# Convert rows to a dictionary for display
         status = "FAIL"
         write_output(
             "Records Only in Source",
@@ -21,3 +26,7 @@ def records_only_in_source(source_df, target_df, key_columns):
 
     return status
 
+source = spark.read.csv("/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info.csv", header=True, inferSchema=True)
+targte = spark.read.csv("/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv", header=True, inferSchema=True)
+
+records_only_in_source(source,targte,['Identifier'])
