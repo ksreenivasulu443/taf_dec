@@ -16,7 +16,7 @@ validations:
   count_check:
     key_columns: ["id"]
   duplicate_check:
-    key_columns: ["customer_id"]
+    key_columns: ["id"]
   null_check:
     null_columns: ["customer_id","name","email"]
   uniqueness_check:

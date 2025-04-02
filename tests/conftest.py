@@ -10,15 +10,10 @@ from src.utility.general_utility import flatten
 
 @pytest.fixture(scope='session')
 def spark_session(request):
-    #dir_path = request.node.fspath.dirname
-    #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    snow_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/snowflake-jdbc-3.14.3.jar'
-    postgres_jar = '/Users/admin/PycharmProjects/test_automation_project/jar/postgresql-42.2.5.jar'
-    azure_storage = '/Users/admin/PycharmProjects/test_automation_project/jar/azure-storage-8.6.6.jar'
-    hadoop_azure = '/Users/admin/PycharmProjects/test_automation_project/jar/hadoop-azure-3.3.1.jar'
-    sql_server = '/Users/admin/PycharmProjects/taf/jars/mssql-jdbc-12.2.0.jre8.jar'
-    jar_path = snow_jar + ',' + postgres_jar + ',' + azure_storage + ',' + hadoop_azure + ',' + sql_server
-    spark = SparkSession.builder.master("local[*]") \
+    postgres_jar = '/Users/admin/PycharmProjects/taf_dec/jars/postgresql-42.2.5.jar'
+
+    jar_path = postgres_jar
+    spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
         .config("spark.jars", jar_path) \
         .config("spark.driver.extraClassPath", jar_path) \
@@ -70,7 +65,7 @@ def read_db(config_data,spark,dir_path):
     creds = load_credentials()
     cred_lookup = config_data['cred_lookup']
     creds = creds[cred_lookup]
-    df = None
+    print("creds", creds)
     if config_data['transformation'][0].lower() == 'y' and config_data['transformation'][1].lower() == 'sql':
         sql_query= read_query(dir_path)
         print("sql_query", sql_query)

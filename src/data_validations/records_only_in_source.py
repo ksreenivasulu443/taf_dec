@@ -1,7 +1,4 @@
 from src.utility.report_lib import write_output
-from pyspark.sql import  SparkSession
-
-spark = SparkSession.builder.master('local[1]').appName('test').getOrCreate()
 
 def records_only_in_source(source_df, target_df, key_columns):
     """Validate records present only in the source."""
@@ -25,8 +22,3 @@ def records_only_in_source(source_df, target_df, key_columns):
         write_output("Records Only in Source", status, "No extra records found in source.")
 
     return status
-
-source = spark.read.csv("/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info.csv", header=True, inferSchema=True)
-targte = spark.read.csv("/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv", header=True, inferSchema=True)
-
-records_only_in_source(source,targte,['Identifier'])

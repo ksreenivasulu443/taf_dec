@@ -1,9 +1,5 @@
 from src.utility.report_lib import write_output
 
-from pyspark.sql import  SparkSession
-
-spark = SparkSession.builder.master('local[1]').appName('test').getOrCreate()
-
 def duplicate_check(df, key_col):
     """Validate that there are no duplicate rows in the specified columns."""
     duplicates = df.groupBy(key_col).count().filter("count > 1")
@@ -28,6 +24,3 @@ def duplicate_check(df, key_col):
         return status
 
 
-target = spark.read.csv("/Users/admin/PycharmProjects/taf_dec/input_files/Contact_info_t.csv", header=True, inferSchema=True)
-
-duplicate_check(target,['Identifier'])
