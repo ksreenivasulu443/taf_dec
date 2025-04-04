@@ -5,6 +5,7 @@ from src.data_validations.uniqueness_check import uniqueness_check
 from src.data_validations.null_validation import null_value_check
 from src.data_validations.records_only_in_source import records_only_in_source
 from src.data_validations.records_only_target import records_only_in_target
+from src.data_validations.data_compare import data_compare
 def test_count_check(read_data,read_config):
     source, target = read_data
     read_config = read_config
@@ -46,6 +47,13 @@ def test_records_only_target(read_data,read_config):
     read_config = read_config
     key_columns = read_config['validations']['count_check']['key_columns']
     status = records_only_in_target( source_df=source, target_df=target, key_columns=key_columns)
+    assert status == 'PASS'
+
+def test_data_compare_check(read_data,read_config):
+    source, target = read_data
+    read_config = read_config
+    key_columns = read_config['validations']['data_compare_check']['key_column']
+    status = data_compare(source=source, target=target, key_column=key_columns)
     assert status == 'PASS'
 
 

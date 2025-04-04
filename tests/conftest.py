@@ -47,7 +47,7 @@ def read_file(config_data,spark, dir_path):
     if config_data['type'] == 'csv':
         if config_data['schema'] == 'Y':
             schema = read_schema(dir_path)
-            df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header'])
+            df = spark.read.schema(schema).csv(config_data['path'], header=config_data['options']['header'],sep=config_data['options']['delimiter'])
         else:
             df = spark.read.csv(config_data['path'], header= config_data['options']['header'],inferSchema=True)
     elif config_data['type'] == 'json':

@@ -1,9 +1,7 @@
 from pyspark.sql.functions import lit, col, when
 from src.utility.report_lib import write_output
 
-
-
-def data_compare(source, target, key_column):
+def data_compare(source, target, key_column, num_of_records_to_diplay_in_report=100):
     columnList = source.columns
     smt = source.exceptAll(target).withColumn("datafrom", lit("source"))
     tms = target.exceptAll(source).withColumn("datafrom", lit("target"))
@@ -12,7 +10,7 @@ def data_compare(source, target, key_column):
 
     failed_count = failed.count()
     if failed_count > 0:
-        failed_records = failed.limit(5).collect()  # Get the first 5 failing rows
+        failed_records = failed.limit(num_of_records_to_diplay_in_report).collect()  # Get the first 5 failing rows
         failed_preview = [row.asDict() for row in failed_records]
         write_output(
                 "data compare Check",
@@ -27,7 +25,7 @@ def data_compare(source, target, key_column):
         )
 
 
-    if failed.count() > 0:
+    if failed_count > 0:
 
         print("columnList", columnList)
         print("keycolumns", key_column)

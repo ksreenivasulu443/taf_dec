@@ -9,7 +9,7 @@ source:
 
 target:
   type: "database"
-  transformation : ["n","sql"]
+  transformation : ["y","python"]
   table: "employees"
   cred_lookup: "postgres"
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
@@ -25,3 +25,4 @@ validations:
     unique_columns: ["id"]
   data_compare_check:
     key_column: ["id"]
+    num_of_records_to_diplay_in_report: 100
