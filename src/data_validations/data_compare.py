@@ -8,7 +8,7 @@ def data_compare(source, target, key_column):
     smt = source.exceptAll(target).withColumn("datafrom", lit("source"))
     tms = target.exceptAll(source).withColumn("datafrom", lit("target"))
     failed = smt.union(tms)
-    #failed.show()
+
 
     failed_count = failed.count()
     if failed_count > 0:
