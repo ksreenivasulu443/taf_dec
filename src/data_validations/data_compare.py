@@ -1,8 +1,8 @@
 from pyspark.sql.functions import lit, col, when
 from src.utility.report_lib import write_output
 
-def data_compare(source, target, key_column, num_records=5):
-    columnList = source.columns
+def data_compare(source, target, key_column, validate_columns,num_records=5):
+
     smt = source.exceptAll(target).withColumn("datafrom", lit("source"))
     tms = target.exceptAll(source).withColumn("datafrom", lit("target"))
     failed = smt.union(tms)
@@ -26,21 +26,21 @@ def data_compare(source, target, key_column, num_records=5):
 
 
     if failed_count > 0:
-
+        columnList = validate_columns # ['id','name','phone']
         print("columnList", columnList)
-        print("keycolumns", key_column)
-        for column in columnList:
+        print("keycolumns", key_column) #['id']
+        for column in columnList: #name
             print(column.lower())
-            if column not in key_column:
-                key_column.append(column)
+            if column not in key_column: # column - phone
+                key_column.append(column) # ['id','phone']
                 temp_source = source.select(key_column).withColumnRenamed(column, "source_" + column)
 
                 temp_target = target.select(key_column).withColumnRenamed(column, "target_" + column)
-                key_column.remove(column)
+                key_column.remove(column) # ['id']
                 temp_join = temp_source.join(temp_target, key_column, how='full_outer')
-                temp_join.withColumn("comparison", when(col('source_' + column) == col("target_" + column),
-                                                        "True").otherwise("False")).filter(
-                    f"comparison == False ").show()
+                (temp_join.withColumn("comparison", when(col('source_' + column) == col("target_" + column),
+                                                        "True").otherwise("False")).
+                 filter("comparison == False ").show())
 
         status ='FAIL'
 
