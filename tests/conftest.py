@@ -5,6 +5,7 @@ import os
 import json
 from pyspark.sql.types import StructType
 from src.utility.general_utility import flatten
+import subprocess
 
 
 
@@ -19,7 +20,8 @@ def spark_session(request):
         .config("spark.driver.extraClassPath", jar_path) \
         .config("spark.executor.extraClassPath", jar_path) \
         .getOrCreate()
-    return spark
+    yield spark
+
 
 @pytest.fixture(scope='module')
 def read_config(request):
@@ -93,7 +95,12 @@ def read_data(read_config,spark_session,request ):
     target_config = config_data['target']
     dir_path = request.node.fspath.dirname
     if source_config['type'] == 'database':
+        if source_config['transformation'][1].lower() == 'python' and source_config['transformation'][0].lower() == 'y':
+            python_file_path = dir_path + '/transformation.py'
+            print("python file name", python_file_path)
+            subprocess.run(["python", python_file_path])
         source = read_db(config_data=source_config,spark=spark,dir_path=dir_path)
+
     else:
         source = read_file(config_data = source_config,spark=spark, dir_path=dir_path)
     if target_config['type'] == 'database':
