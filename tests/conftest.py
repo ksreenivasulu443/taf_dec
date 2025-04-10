@@ -112,15 +112,12 @@ def read_data(read_config,spark_session,request ):
 
     return source.drop(*source_config['exclude_cols']), target.drop(*target_config['exclude_cols'])
 
-
-
-
-
 def load_credentials(env="qa"):
     """Load credentials from the centralized YAML file."""
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     credentials_path = taf_path+'/project_config/cred_config.yml'
 
+    print("dummy code")
     with open(credentials_path, "r") as file:
         credentials = yaml.safe_load(file)
         print(credentials[env])
