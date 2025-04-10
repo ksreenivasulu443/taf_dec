@@ -114,6 +114,8 @@ def read_data(read_config,spark_session,request ):
 
 
 
+
+
 def load_credentials(env="qa"):
     """Load credentials from the centralized YAML file."""
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
