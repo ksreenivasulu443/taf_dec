@@ -7,7 +7,7 @@ from src.data_validations.records_only_in_source import records_only_in_source
 from src.data_validations.records_only_target import records_only_in_target
 from src.data_validations.data_compare import data_compare
 
-
+import pytest
 # source1(csv)
 #         ====> target(db)--> source_id/source_from
 # source2(db)
@@ -56,15 +56,16 @@ def test_count_check(read_data,read_config):
 #     status = records_only_in_target( source_df=source, target_df=target, key_columns=key_columns)
 #     assert status == 'PASS'
 #
-# def test_data_compare_check(read_data,read_config):
-#     source, target = read_data()
-#
-#     read_config = read_config
-#     key_columns = read_config['validations']['data_compare_check']['key_column']
-#     num_records = read_config['validations']['data_compare_check']['num_records']
-#     validate_columns = read_config['validations']['data_compare_check']['validate_columns']
-#     status = data_compare(source=source, target=target, key_column=key_columns,validate_columns=validate_columns , num_records=num_records)
-#     assert status == 'PASS'
+@pytest.marker.prod
+def test_dq_check(read_data,read_config):
+    source, target = read_data()
+
+    read_config = read_config
+    key_columns = read_config['validations']['data_compare_check']['key_column']
+    num_records = read_config['validations']['data_compare_check']['num_records']
+    validate_columns = read_config['validations']['data_compare_check']['validate_columns']
+    status = data_compare(source=source, target=target, key_column=key_columns,validate_columns=validate_columns , num_records=num_records)
+    assert status == 'PASS'
 
 
 

@@ -18,6 +18,7 @@ def name_check(target, column):
     return status
 
 
+
 def check_range(target, column, min_val, max_val):
     invalid_count = target.filter((col(column) < min_val) | (col(column) > max_val)).count()
     return invalid_count == 0
