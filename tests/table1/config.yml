@@ -16,7 +16,7 @@ target:
 
 validations:
   count_check:
-    key_columns: ["id"]
+    key_columns: ["id",'customer_name']
   duplicate_check:
     key_columns: ["id"]
   null_check:
