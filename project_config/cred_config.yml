@@ -23,7 +23,13 @@ qa:
     driver: "org.postgresql.Driver"
     port: 5432
 
-  sqlserver:
+  sqlserver_c:
+    url: "jdbc:sqlserver://decautoserver.database.windows.net:1433;database=decauto"
+    user: "decadmin"
+    password: "Dharmavaram1@"
+    driver: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+  sqlserver_l:
     url: "jdbc:sqlserver://decautoserver.database.windows.net:1433;database=decauto"
     user: "decadmin"
     password: "Dharmavaram1@"

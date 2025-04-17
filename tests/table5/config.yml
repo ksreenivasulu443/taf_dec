@@ -7,6 +7,7 @@ source:
     delimiter: ","
   exclude_cols: ["created_date","updated_date","hash_key","batch_id"]
 
+
 target:
   type: "database"
   transformation : ["n","na"]

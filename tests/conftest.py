@@ -12,12 +12,11 @@ import subprocess
 @pytest.fixture(scope='session')
 def spark_session(request):
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    postgres_jar = taf_path+'/jars/postgresql-42.2.5.jar'
     azure_storage = taf_path+'/jars/azure-storage-8.6.6.jar'
     hadoop_azure = taf_path+'/jars/hadoop-azure-3.3.1.jar'
     sql_server = taf_path+'/jars/mssql-jdbc-12.2.0.jre8.jar'
 
-    jar_path = postgres_jar + ',' + azure_storage + ',' + hadoop_azure + ',' + sql_server
+    jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server
 
     spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
@@ -28,7 +27,6 @@ def spark_session(request):
     cred = load_credentials('qa')['adls']
     adls_account_name = cred['adls_account_name']
     key = cred['key']
-    print(key, adls_account_name)
     spark.conf.set(f"fs.azure.account.auth.type.{adls_account_name}.dfs.core.windows.net", "SharedKey")
     spark.conf.set(f"fs.azure.account.key.{adls_account_name}.dfs.core.windows.net", key)
     return spark

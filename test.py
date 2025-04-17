@@ -24,9 +24,9 @@ adls_path = f"abfss://{adls_container_name}@{adls_account_name}.dfs.core.windows
 source_df = spark.read.csv(adls_path, inferSchema=True, header=True)
 
 source_df.show()
-
-
-
+#
+#
+#
 df = spark.read.format("jdbc"). \
     option("url", "jdbc:sqlserver://decautoserver.database.windows.net:1433;database=decauto"). \
     option("user", 'decadmin'). \
