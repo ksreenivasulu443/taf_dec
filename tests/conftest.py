@@ -12,9 +12,13 @@ import subprocess
 @pytest.fixture(scope='session')
 def spark_session(request):
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    azure_storage = taf_path+'/jars/azure-storage-8.6.6.jar'
-    hadoop_azure = taf_path+'/jars/hadoop-azure-3.3.1.jar'
-    sql_server = taf_path+'/jars/mssql-jdbc-12.2.0.jre8.jar'
+
+    azure_storage= os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
+    hadoop_azure= os.path.join(taf_path, "jars", "hadoop-azure-3.3.1.jar")
+    sql_server= os.path.join(taf_path, "jars", "mssql-jdbc-12.2.0.jre8.jar")
+    # azure_storage = taf_path+'/jars/azure-storage-8.6.6.jar'
+    # hadoop_azure = taf_path+'/jars/hadoop-azure-3.3.1.jar'
+    # sql_server = taf_path+'/jars/mssql-jdbc-12.2.0.jre8.jar'
 
     jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server
 
@@ -34,7 +38,9 @@ def spark_session(request):
 
 @pytest.fixture(scope='module')
 def read_config(request):
-    config_path = request.node.fspath.dirname + '/config.yml'
+    #config_path = request.node.fspath.dirname + '/config.yml'
+    dir_path = request.node.fspath.dirname
+    config_path = os.path.join(dir_path, "config.yml")
     print("config path", config_path)
     with open(config_path, 'r') as f:
         config_data = yaml.safe_load(f)
@@ -42,13 +48,15 @@ def read_config(request):
 
 
 def read_schema(dir_path):
-    schema_path = dir_path + '/schema.json'
+    #schema_path = dir_path + '/schema.json'
+    schema_path =  os.path.join(dir_path, "schema.json")
     with open(schema_path, 'r') as schema_file:
         schema = StructType.fromJson(json.load(schema_file))
     return schema
 
 def read_query(dir_path):
     sql_query_path = dir_path + '/transformation.sql'
+    sql_query_path = os.path.join(dir_path, "transformation.sql")
     with open(sql_query_path, "r") as file:
         sql_query = file.read()
     return sql_query
@@ -124,7 +132,8 @@ def read_data(read_config,spark_session,request ):
 def load_credentials(env="qa"):
     """Load credentials from the centralized YAML file."""
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    credentials_path = taf_path+'/project_config/cred_config.yml'
+    # credentials_path = taf_path+'/project_config/cred_config.yml'
+    credentials_path= os.path.join(taf_path, "project_config", "cred_config.yml")
 
     print("dummy code")
     with open(credentials_path, "r") as file:
