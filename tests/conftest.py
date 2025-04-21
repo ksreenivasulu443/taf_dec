@@ -134,8 +134,6 @@ def load_credentials(env="qa"):
     taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # credentials_path = taf_path+'/project_config/cred_config.yml'
     credentials_path= os.path.join(taf_path, "project_config", "cred_config.yml")
-
-    print("dummy code")
     with open(credentials_path, "r") as file:
         credentials = yaml.safe_load(file)
         print(credentials[env])
