@@ -1,7 +1,7 @@
 from pyspark.sql.functions import lit, col, when
 from src.utility.report_lib import write_output
 
-def data_compare(source, target, key_column, validate_columns,num_records=5):
+def data_compare(source, target, key_column, validate_columns=None,num_records=5):
 
     smt = source.exceptAll(target).withColumn("datafrom", lit("source"))
     tms = target.exceptAll(source).withColumn("datafrom", lit("target"))
@@ -26,7 +26,10 @@ def data_compare(source, target, key_column, validate_columns,num_records=5):
 
 
     if failed_count > 0:
-        columnList = validate_columns # ['id','name','phone']
+        if validate_columns is None:
+            columnList= source.columns
+        else:
+            columnList = validate_columns # ['id','name','phone']
         print("columnList", columnList)
         print("keycolumns", key_column) #['id']
         for column in columnList: #name

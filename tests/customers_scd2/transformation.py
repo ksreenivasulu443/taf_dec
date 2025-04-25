@@ -1,43 +1,59 @@
+from gitdb.fun import delta_types
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit, current_timestamp, sha2, concat_ws, date_format
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from tests.conftest import load_credentials
+import os
+taf_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+azure_storage = os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
+hadoop_azure = os.path.join(taf_path, "jars", "hadoop-azure-3.3.1.jar")
+sql_server = os.path.join(taf_path, "jars", "mssql-jdbc-12.2.0.jre8.jar")
+jar_path = azure_storage + ',' + hadoop_azure + ',' + sql_server
+
+print(azure_storage)
 # Initialize Spark session
-spark = SparkSession.builder.master("local[4]") \
+spark = SparkSession.builder.master("local[1]") \
         .appName("pytest_framework") \
-        .config("spark.jars", "/Users/admin/PycharmProjects/taf/jars/mssql-jdbc-12.2.0.jre8.jar") \
-        .config("spark.driver.extraClassPath", "/Users/admin/PycharmProjects/taf/jars/mssql-jdbc-12.2.0.jre8.jar") \
-        .config("spark.executor.extraClassPath", "/Users/admin/PycharmProjects/taf/jars/mssql-jdbc-12.2.0.jre8.jar") \
+        .config("spark.jars", jar_path) \
+        .config("spark.driver.extraClassPath", jar_path) \
+        .config("spark.executor.extraClassPath", jar_path) \
         .getOrCreate()
 
-adls_account_name = "septauto"
-adls_container_name = "raw"
-key = "6TR8QTDWIWj0EshX2YRzMln2dYylTAVUECMoLHE2JPo0SwXt9Kbybqpca96qNTnndDFGB/t4UbTo+AStbQROcg=="
-input_file = "customer_data_02.csv"
+creds_adls = load_credentials()['adls']
+creds_sqlserver = load_credentials()['sqlserver']
+
+adls_account_name = creds_adls['adls_account_name']
+adls_container_name = creds_adls['adls_container_name']
+key = creds_adls['key']
+
 # ADLS file path and credentials
-adls_path = f"abfss://{adls_container_name}@{adls_account_name}.dfs.core.windows.net/customer/{input_file}"
+adls_path = f"abfss://{adls_container_name}@{adls_account_name}.dfs.core.windows.net/raw/customer/"
 spark.conf.set(f"fs.azure.account.key.{adls_account_name}.dfs.core.windows.net", key)
 
-
 # Azure SQL Server JDBC configuration
-jdbc_url = "jdbc:sqlserver://septauto.database.windows.net:1433;database=septbatch"
+jdbc_url = creds_sqlserver['url']
+user = creds_sqlserver['user']
+password = creds_sqlserver['password']
+driver = creds_sqlserver['driver']
+print(driver, user,password,jdbc_url)
 jdbc_properties = {
-    "user": "septadmin",
-    "password": "Dharmavaram1@",
-    "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    "user": user,
+    "password": password,
+    "driver": driver
 }
 
 
-bronze_df = spark.read.jdbc(url=jdbc_url, table='customer_bronze_scd2', properties=jdbc_properties)
+bronze_df = spark.read.jdbc(url=jdbc_url, table='customers_bronze', properties=jdbc_properties).drop('hash_key')
 
-silver_df = spark.read.jdbc(url=jdbc_url, table='customer_silver_scd2_backup', properties=jdbc_properties)
+silver_df = spark.read.jdbc(url=jdbc_url, table='customers_silver_scd2_backup', properties=jdbc_properties)
 
 print("bronze df")
 # bronze_df.display()
 print("silver_df")
 # silver_df.display()
 
-columns = ['customer_id','name','email','phone','batchid','created_date','updated_date','hash_key','start_date','end_date','history_flag']
+columns = ['customer_id','name','email','phone','batchid','created_date','updated_date','start_date','end_date','history_flag']
 updates1 = (bronze_df.join(silver_df.select("customer_id", "created_date","batchid"), on="customer_id", how="left_semi")
             .withColumn('start_date', current_timestamp()).withColumn('end_date',lit('2099-12-31T23:59:59')).
             withColumn('history_flag',lit(False)))
