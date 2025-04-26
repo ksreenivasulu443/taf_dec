@@ -14,6 +14,12 @@
     },
     {
       "metadata": {},
+      "name": "email",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
       "name": "phone",
       "nullable": true,
       "type": "string"

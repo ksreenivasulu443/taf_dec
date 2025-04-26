@@ -1,7 +1,7 @@
 source:
   type: "database"
   transformation : ["y","python"]
-  table: "[dbo].[customers_silver_exp]"
+  table: "[dbo].[customer_silver_expected]"
   cred_lookup: "sqlserver"
   exclude_cols: ["created_date","updated_date","hash_key","rnk"]
 
