@@ -16,7 +16,7 @@ def spark_session(request):
     azure_storage= os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
     hadoop_azure= os.path.join(taf_path, "jars", "hadoop-azure-3.3.1.jar")
     sql_server= os.path.join(taf_path, "jars", "mssql-jdbc-12.2.0.jre8.jar")
-    # azure_storage = taf_path+'/jars/azure-storage-8.6.6.jar'
+    # azure_storage = taf_path+'\jars\azure-storage-8.6.6.jar'
     # hadoop_azure = taf_path+'/jars/hadoop-azure-3.3.1.jar'
     # sql_server = taf_path+'/jars/mssql-jdbc-12.2.0.jre8.jar'
 
@@ -55,7 +55,7 @@ def read_schema(dir_path):
     return schema
 
 def read_query(dir_path):
-    sql_query_path = dir_path + '/transformation.sql'
+    #sql_query_path = dir_path + '/transformation.sql'
     sql_query_path = os.path.join(dir_path, "transformation.sql")
     with open(sql_query_path, "r") as file:
         sql_query = file.read()

@@ -2,9 +2,20 @@ from gitdb.fun import delta_types
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit, current_timestamp, sha2, concat_ws, date_format
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from tests.conftest import load_credentials
+import yaml
 import os
 taf_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+def load_credentials(env="qa"):
+    """Load credentials from the centralized YAML file."""
+    #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # credentials_path = taf_path+'/project_config/cred_config.yml'
+    #credentials_path= os.path.join(taf_path, "project_config", "cred_config.yml")
+    credentials_path = '/Users/admin/PycharmProjects/taf_dec/project_config/cred_config.yml'
+    with open(credentials_path, "r") as file:
+        credentials = yaml.safe_load(file)
+        print(credentials[env])
+    return credentials[env]
 
 azure_storage = os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
 hadoop_azure = os.path.join(taf_path, "jars", "hadoop-azure-3.3.1.jar")
@@ -43,12 +54,13 @@ jdbc_properties = {
     "driver": driver
 }
 
-bronze_df = spark.read.jdbc(url=jdbc_url, table='customer_bronze', properties=jdbc_properties).drop('hash_key')
+bronze_df = spark.read.jdbc(url=jdbc_url, table='customers_bronze', properties=jdbc_properties).drop('hash_key')
 
 silver_df = spark.read.jdbc(url=jdbc_url, table='customers_silver_backup', properties=jdbc_properties)
 
 columns = ['customer_id','name','email','phone','batchid','created_date','updated_date']
-updates = bronze_df.join(silver_df.select("customer_id", "created_date","batchid"), on="customer_id", how="inner").drop(bronze_df.created_date,bronze_df.batchid)
+updates = (bronze_df.join(silver_df.select("customer_id", "created_date","batchid"), on="customer_id", how="inner").
+           drop(bronze_df.created_date,bronze_df.batchid))
 
 silver_not_in_bronze = silver_df.join(bronze_df, on="customer_id", how="left_anti")
 
@@ -56,7 +68,7 @@ new_records = bronze_df.join(silver_df, on="customer_id", how="left_anti")
 
 final_df = updates.select(*columns).union(new_records.select(*columns)).union(silver_not_in_bronze.select(*columns))
 
-final_df.cache()
+# final_df.cache()
 print("final df")
 final_df.show()
 final_df.write.jdbc(url=jdbc_url, table='customer_silver_expected', mode="overwrite", properties=jdbc_properties)

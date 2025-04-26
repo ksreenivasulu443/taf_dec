@@ -2,8 +2,8 @@ from gitdb.fun import delta_types
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit, current_timestamp, sha2, concat_ws, date_format
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from tests.conftest import load_credentials
 import os
+import yaml
 taf_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 azure_storage = os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
@@ -19,6 +19,17 @@ spark = SparkSession.builder.master("local[1]") \
         .config("spark.driver.extraClassPath", jar_path) \
         .config("spark.executor.extraClassPath", jar_path) \
         .getOrCreate()
+
+def load_credentials(env="qa"):
+    """Load credentials from the centralized YAML file."""
+    #taf_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # credentials_path = taf_path+'/project_config/cred_config.yml'
+    #credentials_path= os.path.join(taf_path, "project_config", "cred_config.yml")
+    credentials_path = '/Users/admin/PycharmProjects/taf_dec/project_config/cred_config.yml'
+    with open(credentials_path, "r") as file:
+        credentials = yaml.safe_load(file)
+        print(credentials[env])
+    return credentials[env]
 
 creds_adls = load_credentials()['adls']
 creds_sqlserver = load_credentials()['sqlserver']
@@ -82,4 +93,4 @@ final_df.cache()
 print("final df")
 final_df.show()
 
-final_df.write.jdbc(url=jdbc_url, table='customer_silver_scd2_expected', mode="overwrite", properties=jdbc_properties)
+final_df.write.jdbc(url=jdbc_url, table='customers_silver_scd2_expected', mode="overwrite", properties=jdbc_properties)
