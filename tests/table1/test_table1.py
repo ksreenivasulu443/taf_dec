@@ -50,13 +50,12 @@ def test_records_only_target(read_data,read_config):
     assert status == 'PASS'
 
 def test_data_compare_check(read_data,read_config):
-    source, target = read_data()
-
+    source, target = read_data
     read_config = read_config
     key_columns = read_config['validations']['data_compare_check']['key_column']
     num_records = read_config['validations']['data_compare_check']['num_records']
     validate_columns = read_config['validations']['data_compare_check']['validate_columns']
-    status = data_compare(source=source, target=target, key_column=key_columns,validate_columns=validate_columns , num_records=num_records)
+    status = data_compare(source=source, target=target, key_column=key_columns , num_records=num_records)
     assert status == 'PASS'
 
 

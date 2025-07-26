@@ -23,3 +23,6 @@ def count_val(source, target, key_columns):
         records_only_in_source(source_df = source, target_df=target, key_columns=key_columns)
 
     return status
+
+print("outside of funct")
+
