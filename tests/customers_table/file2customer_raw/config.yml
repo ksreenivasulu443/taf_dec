@@ -5,14 +5,14 @@ source:
   options:
     header: True
     delimiter: ","
-  exclude_cols: ["created_date","updated_date","hash_key"]
+  exclude_cols: ["batch_id"]
 
 target:
   type: "database"
   transformation : ["y","sql"]
   table: "[dbo].[customers_raw]"
   cred_lookup: "sqlserver"
-  exclude_cols: ["created_date","updated_date","hash_key","rnk"]
+  exclude_cols: ["batch_id"]
 
 validations:
   count_check:

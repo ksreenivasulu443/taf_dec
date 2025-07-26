@@ -16,11 +16,12 @@ def spark_session(request):
     azure_storage= os.path.join(taf_path, "jars", "azure-storage-8.6.6.jar")
     hadoop_azure= os.path.join(taf_path, "jars", "hadoop-azure-3.3.1.jar")
     sql_server= os.path.join(taf_path, "jars", "mssql-jdbc-12.2.0.jre8.jar")
+    postgres_jar = os.path.join(taf_path, "jars", "postgresql-42.2.5.jar")
     # azure_storage = taf_path+'\jars\azure-storage-8.6.6.jar'
     # hadoop_azure = taf_path+'/jars/hadoop-azure-3.3.1.jar'
     # sql_server = taf_path+'/jars/mssql-jdbc-12.2.0.jre8.jar'
 
-    jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server
+    jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server + ',' + postgres_jar
 
     spark = SparkSession.builder.master("local[*]") \
         .appName("pytest_framework") \

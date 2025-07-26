@@ -1,3 +1,4 @@
+import pytest
 
 from src.data_validations.count_check import count_val
 from src.data_validations.duplicate_validation import duplicate_check
@@ -6,6 +7,8 @@ from src.data_validations.null_validation import null_value_check
 from src.data_validations.records_only_in_source import records_only_in_source
 from src.data_validations.records_only_target import records_only_in_target
 from src.data_validations.data_compare import data_compare
+
+@pytest.mark.regression
 def test_count_check(read_data,read_config):
     source, target = read_data
     read_config = read_config
@@ -13,7 +16,9 @@ def test_count_check(read_data,read_config):
     status = count_val(source=source, target=target,key_columns=key_columns)
     assert  status == 'PASS'
 
-
+@pytest.mark.regression
+@pytest.mark.sanity
+@pytest.mark.smoke
 def test_duplicate_check(read_data,read_config):
     source, target = read_data
     read_config = read_config
