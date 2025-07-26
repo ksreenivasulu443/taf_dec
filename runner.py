@@ -7,7 +7,7 @@ sys.dont_write_bytecode = True
 def main():
     # Customize the arguments for pytest run
     pytest_args = [
-        "tests/file2customer_raw",                      # Folder containing your test cases
+        "tests/customers_table/file2customer_raw",                      # Folder containing your test cases
         "-v",                          # Verbose output
         "--tb=short",                  # Short traceback format
         "--capture=tee-sys",          # Capture and also print stdout/stderr

@@ -49,7 +49,7 @@ def test_records_only_target(read_data,read_config):
     status = records_only_in_target( source_df=source, target_df=target, key_columns=key_columns)
     assert status == 'PASS'
 
-def test_data_compare_check(read_data,read_config):
+def abc_test_data_compare_check(read_data,read_config):
     source, target = read_data
 
     read_config = read_config

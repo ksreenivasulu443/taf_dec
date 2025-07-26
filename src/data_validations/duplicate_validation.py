@@ -1,8 +1,13 @@
 from src.utility.report_lib import write_output
 
+
 def duplicate_check(df, key_col):
     """Validate that there are no duplicate rows in the specified columns."""
+
+    df.createOrReplaceTempView('df')
     duplicates = df.groupBy(key_col).count().filter("count > 1")
+    #duplicates = spark.sql("select keycol, count(1) from df group by keycol having count(1)>1")
+
     print("duplcates dataframe")
     duplicates.show()
     duplicate_count = duplicates.count()
