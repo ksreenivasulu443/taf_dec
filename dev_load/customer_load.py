@@ -46,4 +46,4 @@ jdbc_properties = {
 }
 
 # Write DataFrame to Azure SQL table
-df.write.jdbc(url=jdbc_url, table='customers_raws', mode='overwrite', properties=jdbc_properties)
+df.write.jdbc(url=jdbc_url, table='customers_raw', mode='overwrite', properties=jdbc_properties)
