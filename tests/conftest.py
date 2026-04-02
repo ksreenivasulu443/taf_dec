@@ -23,7 +23,7 @@ def spark_session(request):
 
     jar_path =  azure_storage + ',' + hadoop_azure + ',' + sql_server + ',' + postgres_jar
 
-    spark = SparkSession.builder.master("local[*]") \
+    spark = SparkSession.builder \
         .appName("pytest_framework") \
         .config("spark.jars", jar_path) \
         .config("spark.driver.extraClassPath", jar_path) \
